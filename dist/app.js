@@ -1,0 +1,12 @@
+const data=window.PORTFOLIO;
+const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+document.getElementById('intro').textContent=data.intro;
+const projects=document.getElementById('projects');
+function render(filter='all'){projects.innerHTML=data.projects.filter(p=>filter==='all'||p.category===filter).map(p=>`<button class="project" data-id="${escape(p.id)}" aria-label="Read about ${escape(p.title)}"><span class="project-num">${escape(p.number)}</span><div><span class="category">${escape(p.category)} · ${escape(p.status)}</span><h3>${escape(p.title)}</h3><p>${escape(p.subtitle)}</p></div><div class="project-summary"><p>${escape(p.summary)}</p><div class="tags">${p.tags.map(t=>`<span>${escape(t)}</span>`).join('')}</div></div><span class="arrow" aria-hidden="true">↗</span></button>`).join('');}
+render();
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-filter]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b));});render(b.dataset.filter);}));
+const dialog=document.getElementById('project-dialog');
+projects.addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;const p=data.projects.find(x=>x.id===b.dataset.id);document.getElementById('project-detail').innerHTML=`<p class="eyebrow">${escape(p.category)} / ${escape(p.status)}</p><h2 id="dialog-title">${escape(p.title)}</h2><p>${escape(p.summary)}</p>${[['Context',p.context],['Design process',p.process],['What I learned / am exploring',p.learning],['Next documentation',p.next]].map(([t,s])=>`<h3>${t}</h3><p>${escape(s)}</p>`).join('')}`;dialog.setAttribute('aria-labelledby','dialog-title');dialog.showModal();});
+document.querySelector('.close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
+document.getElementById('interests').innerHTML=data.interests.map(([t,s],i)=>`<article><p class="eyebrow">0${i+1}</p><h3>${escape(t)}</h3><p>${escape(s)}</p></article>`).join('');
+const cv=document.getElementById('cv-download');if(data.cvUrl){cv.href=data.cvUrl;cv.hidden=false;cv.target='_blank';cv.rel='noopener';document.getElementById('cv-status').textContent='Education, experience, and skills in one place.';}else{document.getElementById('cv-status').textContent='CV will be added here soon.';}
